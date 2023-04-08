@@ -1,6 +1,8 @@
+import Board from '../components/Board';
+
 const Home = () => (
-  <div className="text-4xl">
-    Hello
+  <div>
+    <Board />
   </div>
 );
 
