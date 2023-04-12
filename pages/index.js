@@ -1,7 +1,9 @@
 import Board from '../components/Board';
+import Sidebar from '../components/Sidebar';
 
 const Home = () => (
-  <div>
+  <div className="flex">
+    <Sidebar />
     <Board />
   </div>
 );
