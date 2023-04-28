@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useWindowSize } from 'react-use';
+import Confetti from 'react-confetti';
 import images from '../assets';
 import { Board } from '../Logic/baghchal';
 import GameStatus from './GameStatus';
@@ -9,6 +11,13 @@ const BaghchalBoard = () => {
   const [virtualBoard, setVirtualBoard] = useState(0);
   const [selectedMoveIndex, setSelectedMoveIndex] = useState();
   const [highlightBaghMove, setHighlightBaghMove] = useState([]);
+  const { width, height } = useWindowSize();
+
+  useEffect(() => {
+    if (board.is_game_over()) {
+      setVirtualBoard(new Board(board.pgn));
+    }
+  }, [board]);
 
   let beingDragged;
   function handleDrag(e) {
@@ -117,6 +126,14 @@ const BaghchalBoard = () => {
             </div>
           </div>
         )}
+      {board.is_game_over() && (
+      <Confetti
+        width={width}
+        height={height}
+        numberOfPieces={200}
+        tweenDuration={5}
+      />
+      )}
       <GameStatus board={board} selectedMoveIndex={selectedMoveIndex} setSelectedMoveIndex={setSelectedMoveIndex} setBoard={setBoard} setVirtualBoard={setVirtualBoard} changeBoardToClickedPgn />
     </div>
   );
