@@ -2,20 +2,17 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import images from '../assets';
 import { Board } from '../Logic/baghchal';
-import Button from './Button';
+import GameStatus from './GameStatus';
 
 const BaghchalBoard = () => {
-//   const b = new Board();
   const [board, setBoard] = useState(new Board());
+  const [virtualBoard, setVirtualBoard] = useState(0);
+  const [selectedMoveIndex, setSelectedMoveIndex] = useState();
   const [highlightBaghMove, setHighlightBaghMove] = useState([]);
 
   let beingDragged;
   function handleDrag(e) {
     beingDragged = e.target;
-    // b.move('G22');
-    // const newBoard = b;
-    // console.log(newBoard);
-    // setBoard({ ...newBoard });
   }
 
   function handleDrop(e) {
@@ -39,32 +36,13 @@ const BaghchalBoard = () => {
     if (beingDragged.id === 'bagh') {
       console.log('bagh dragg');
       if (board.next_turn === 'B') {
-        // if (finalColumn - initialColumn === 2 || finalColumn - initialColumn === -2 || finalRow - finalColumn === 2 || finalRow - finalColumn === -2) {
-        //   board.move(`Bx${initialRow}${initialColumn}${finalRow}${finalColumn}`);
-        // } else {
-        //   board.move(`B${initialRow}${initialColumn}${finalRow}${finalColumn}`);
-        // }
         board.pure_move(`${initialRow}${initialColumn}${finalRow}${finalColumn}`);
-        // const newBoard = board;
-        // setBoard({ ...newBoard });
-        // console.log(board,.pgn);
-        // console.log('--------');
-        // console.log(board);
         setBoard(new Board(board.pgn));
       } else {
         console.log(board.next_turn);
         console.log(board);
       }
     }
-
-    // const newboard = [...board];
-    // newboard[initialRow][initialColumn] = 0;
-    // if (beingDragged.id === 'goat') {
-    //   newboard[finalRow][finalColumn] = 'G';
-    // } else if (beingDragged.id === 'bagh') {
-    //   newboard[finalRow][finalColumn] = 'T';
-    // }
-    // setBoard(newboard);
   }
 
   function handleDragOver(e) {
@@ -95,52 +73,51 @@ const BaghchalBoard = () => {
     }
   }
 
-  function changeBoardToClickedPgn(val) {
-    console.log(board.pgn.split(val));
-    // concept of virtual board
-    setBoard({ ...board, board: new Board(board.pgn.split(val)[0]).board });
-  }
-
   return (
     <div className="flex w-full justify-around items-center">
+      {virtualBoard === 0
+        ? (
+          <div className="flex justify-center items-center h-[625px] w-[625px]">
+            <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
+              <Image className="absolute" src={images.board} alt="board-image" />
+              {board.board.map((row, rowIndex) => (
+                <div key={rowIndex} className="flex justify-between">
+                  {row.map((val, colIndex) => (
+                    val === 0
+                      ? highlightBaghMove.some((subArr) => JSON.stringify(subArr) === JSON.stringify([rowIndex, colIndex]))
+                        ? <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-green-500 z-10 hover:bg-white hover:cursor-pointer" onDragOver={handleDragOver} onDrop={handleDrop} onClick={handlePositionClick}>{rowIndex}{colIndex}</div>
+                        : <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-red-500 z-10 hover:bg-white hover:cursor-pointer" onDragOver={handleDragOver} onDrop={handleDrop} onClick={handlePositionClick}>{rowIndex}{colIndex}</div>
 
-      <div className="flex justify-center items-center h-[625px] w-[625px]">
-        <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
-          <Image className="absolute" src={images.board} alt="board-image" />
-          {board.board.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex justify-between">
-              {row.map((val, colIndex) => (
-                val === 0
-                  ? highlightBaghMove.some((subArr) => JSON.stringify(subArr) === JSON.stringify([rowIndex, colIndex]))
-                    ? <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-green-500 z-10 hover:bg-white hover:cursor-pointer" onDragOver={handleDragOver} onDrop={handleDrop} onClick={handlePositionClick}>{rowIndex}{colIndex}</div>
-                    : <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-red-500 z-10 hover:bg-white hover:cursor-pointer" onDragOver={handleDragOver} onDrop={handleDrop} onClick={handlePositionClick}>{rowIndex}{colIndex}</div>
-
-                  : val.constructor.name === 'Goat' ? <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer" draggable onDragStart={handleDrag}><Image id="goat" className={`${rowIndex}-${colIndex}`} src={images.goat} alt="goat-image" /></div>
-                    : <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer" draggable onDragStart={handleDrag} onClick={handleBaghClick}> <Image id="bagh" className={`${rowIndex}-${colIndex}`} src={images.bagh} alt="bagh-image" /></div>
+                      : val.constructor.name === 'Goat' ? <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer" draggable onDragStart={handleDrag}><Image id="goat" className={`${rowIndex}-${colIndex}`} src={images.goat} alt="goat-image" /></div>
+                        : <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer" draggable onDragStart={handleDrag} onClick={handleBaghClick}> <Image id="bagh" className={`${rowIndex}-${colIndex}`} src={images.bagh} alt="bagh-image" /></div>
+                  ))}
+                </div>
               ))}
             </div>
-          ))}
-        </div>
-      </div>
-      <div className="bg-status-bg-dark w-2/5 h-2/3">
-        <div>Status:</div>
-        <br />
-        <div>Current Turn - {board.next_turn}</div>
-        {/* <div>pgn {board.pgn}</div> */}
-        <div>Goat Captured - {board.goats_captured}</div>
-        <div>BaghTrapped - {board.baghs_trapped}</div>
-        <div>Goat Placed - {board.goats_placed}</div>
-        {/* <div>winner {board.is_game_over()}</div> */}
-        {board.is_game_over() ? <div>winner {board.winner()}</div> : <div>Not over</div>}
-        {/* {!board.is_game_over() ?? <div>Game Not OVer</div>} */}
-        {/* <div>fen {board.fen_count}</div> */}
-        <br />
-        <br />
-        <div>Moves</div>
-        {board.pgn.split(' ').map((v, i) => ((i + 1) % 2 === 1 ? <><span className="cursor-pointer" onClick={() => { changeBoardToClickedPgn(v); }}>{v}</span> <br /></> : <span>{v} </span>))}
-        <br />
-        <Button classStyles="p-2 bg-red-500 rounded-sm" btnName="Restart" handleClick={() => setBoard(new Board())} />
-      </div>
+          </div>
+        )
+
+        : (
+          <div className="flex justify-center items-center h-[625px] w-[625px]">
+            <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
+              <Image className="absolute" src={images.board} alt="board-image" />
+              {virtualBoard.board.map((row, rowIndex) => (
+                <div key={rowIndex} className="flex justify-between">
+                  {row.map((val, colIndex) => (
+                    val === 0
+                      ? highlightBaghMove.some((subArr) => JSON.stringify(subArr) === JSON.stringify([rowIndex, colIndex]))
+                        ? <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-green-500 z-10 hover:bg-white hover:cursor-pointer">{rowIndex}{colIndex}</div>
+                        : <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-red-500 z-10 hover:bg-white hover:cursor-pointer">{rowIndex}{colIndex}</div>
+
+                      : val.constructor.name === 'Goat' ? <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer"><Image id="goat" className={`${rowIndex}-${colIndex}`} src={images.goat} alt="goat-image" /></div>
+                        : <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer"> <Image id="bagh" className={`${rowIndex}-${colIndex}`} src={images.bagh} alt="bagh-image" /></div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      <GameStatus board={board} selectedMoveIndex={selectedMoveIndex} setSelectedMoveIndex={setSelectedMoveIndex} setBoard={setBoard} setVirtualBoard={setVirtualBoard} changeBoardToClickedPgn />
     </div>
   );
 };
