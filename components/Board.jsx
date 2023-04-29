@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useWindowSize } from 'react-use';
 import Confetti from 'react-confetti';
 import images from '../assets';
-import { Board, Engine } from '../Logic/baghchal';
+import { Board } from '../Logic/baghchal';
 import GameStatus from './GameStatus';
 import PlayerCard from './PlayerCard';
 
@@ -14,6 +14,24 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '' }) => {
   const [highlightBaghMove, setHighlightBaghMove] = useState([]);
   const { width, height } = useWindowSize();
   const [botCalculating, setBotCalculaing] = useState(false);
+
+  const workerRef = useRef();
+
+  useEffect(() => {
+    workerRef.current = new Worker(new URL('../worker.js', import.meta.url));
+    workerRef.current.onmessage = (event) => { setVirtualBoard(0); setBoard(new Board(event.data)); setBotCalculaing(false); };
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, [board.board]);
+
+  const handleWork = useCallback(async () => {
+    if (board.next_turn === botIs) {
+      setBotCalculaing(true);
+      setVirtualBoard(new Board(board.pgn));
+      workerRef.current?.postMessage(board.pgn);
+    }
+  }, [board.board]);
 
   let beingDragged;
   function handleDrag(e) {
@@ -78,28 +96,28 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '' }) => {
     }
   }
 
-  function ai() {
-    setBotCalculaing(true);
-    const level = playerTwo.username === 'bot' ? playerTwo.level : 2;
-    const e = new Engine(level);
-    let move = e.get_best_move(board);
-    if (move[0] === 0) {
-      move = [board.possible_moves()[0], move[1]];
-      if (board.possible_moves().length === 0) {
-        return;
-      }
-    }
-    board.move(move[0]);
-    setBoard(new Board(board.pgn));
-    setBotCalculaing(false);
-  }
+  // function ai() {
+  //   setBotCalculaing(true);
+  //   const level = playerTwo.username === 'bot' ? playerTwo.level : 2;
+  //   const e = new Engine(level);
+  //   let move = e.get_best_move(board);
+  //   if (move[0] === 0) {
+  //     move = [board.possible_moves()[0], move[1]];
+  //     if (board.possible_moves().length === 0) {
+  //       return;
+  //     }
+  //   }
+  //   board.move(move[0]);
+  //   setBoard(new Board(board.pgn));
+  //   setBotCalculaing(false);
+  // }
 
   useEffect(() => {
     if (board.is_game_over()) {
       setVirtualBoard(new Board(board.pgn));
     }
     if (board.next_turn === botIs) {
-      ai();
+      handleWork();
     }
   }, [board]);
 
@@ -138,26 +156,38 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '' }) => {
             <PlayerCard player={playerOne} botIS={botIs} />
           </div>
         )
-
         : (
-          <div className="flex justify-center items-center h-[625px] w-[625px]">
-            <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
-              <Image className="absolute" src={images.board} alt="board-image" />
-              {virtualBoard.board.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex justify-between">
-                  {row.map((val, colIndex) => (
-                    val === 0
-                      ? highlightBaghMove.some((subArr) => JSON.stringify(subArr) === JSON.stringify([rowIndex, colIndex]))
-                        ? <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-green-500 z-10 hover:bg-white hover:cursor-pointer">{rowIndex}{colIndex}</div>
-                        : <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-red-500 z-10 hover:bg-white hover:cursor-pointer">{rowIndex}{colIndex}</div>
-
-                      : val.constructor.name === 'Goat' ? <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer"><Image id="goat" className={`${rowIndex}-${colIndex}`} src={images.goat} alt="goat-image" /></div>
-                        : <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer"> <Image id="bagh" className={`${rowIndex}-${colIndex}`} src={images.bagh} alt="bagh-image" /></div>
-                  ))}
+          <div className="flex flex-col justify-around">
+            {botCalculating
+              ? (
+                <div className="flex gap-3">
+                  <PlayerCard player={playerTwo} botIS={botIs} />
+                  <Image className="bg-white rounded-md" src={images.loadingDots} height={30} width={40} />
                 </div>
-              ))}
+              ) : (
+                <PlayerCard player={playerTwo} botIS={botIs} />
+              )}
+            <div className="flex justify-center items-center h-[625px] w-[625px]">
+              <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
+                <Image className="absolute" src={images.board} alt="board-image" />
+                {virtualBoard.board.map((row, rowIndex) => (
+                  <div key={rowIndex} className="flex justify-between">
+                    {row.map((val, colIndex) => (
+                      val === 0
+                        ? highlightBaghMove.some((subArr) => JSON.stringify(subArr) === JSON.stringify([rowIndex, colIndex]))
+                          ? <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-green-500 z-10 hover:bg-white hover:cursor-pointer">{rowIndex}{colIndex}</div>
+                          : <div key={`${rowIndex}${colIndex}`} id={`place ${rowIndex}-${colIndex}`} className="h-[34px] w-[34px] rounded-full bg-red-500 z-10 hover:bg-white hover:cursor-pointer">{rowIndex}{colIndex}</div>
+
+                        : val.constructor.name === 'Goat' ? <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer"><Image id="goat" className={`${rowIndex}-${colIndex}`} src={images.goat} alt="goat-image" /></div>
+                          : <div key={`${rowIndex}${colIndex}`} className="h-[34px] w-[34px] rounded-full z-10 scale-125 hover:bg-white hover:cursor-pointer"> <Image id="bagh" className={`${rowIndex}-${colIndex}`} src={images.bagh} alt="bagh-image" /></div>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
+            <PlayerCard player={playerOne} botIS={botIs} />
           </div>
+
         )}
       {board.is_game_over() && (
       <Confetti
