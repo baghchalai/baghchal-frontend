@@ -2,12 +2,15 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useWindowSize } from 'react-use';
 import Confetti from 'react-confetti';
+import axios from 'axios';
 import images from '../assets';
 import { Board } from '../Logic/baghchal';
 import GameStatus from './GameStatus';
 import PlayerCard from './PlayerCard';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '' }) => {
+  const { token } = useAuthContext();
   const [board, setBoard] = useState(new Board());
   const [virtualBoard, setVirtualBoard] = useState(0);
   const [selectedMoveIndex, setSelectedMoveIndex] = useState();
@@ -115,6 +118,20 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '' }) => {
   useEffect(() => {
     if (board.is_game_over()) {
       setVirtualBoard(new Board(board.pgn));
+      axios({
+        method: 'POST',
+        url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/`,
+        headers: {
+          Authorization: `JWT ${token.access}`,
+        },
+        data: {
+          user: token.id,
+          pgn: board.pgn,
+          played_as: botIs === 'B' ? 'goat' : 'bagh',
+        },
+      }).then((res) => {
+        console.log(res);
+      }).catch((err) => console.log(err));
     }
     if (board.next_turn === botIs) {
       handleWork();

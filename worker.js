@@ -1,9 +1,7 @@
 // https://stackoverflow.com/a/39575124
-import { Engine } from './Logic/baghchal';
-import { Board } from './Logic/baghchal';
+import { Board, Engine } from './Logic/baghchal';
 
-function pi(boardpgn) {
-  console.log('***************************');
+function ai(boardpgn) {
   const board = new Board(boardpgn);
   if (board.next_turn === 'G') {
     const e = new Engine(5);
@@ -20,6 +18,6 @@ function pi(boardpgn) {
 }
 
 addEventListener('message', (event) => {
-  postMessage(pi(event.data));
+  postMessage(ai(event.data));
 });
 

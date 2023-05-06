@@ -17,7 +17,7 @@ const BaghvsBot = () => {
   };
 
   return (
-    <Board playerOne={user1} playerTwo={bot} botIs="G" />
+    <Board playerOne={user1} playerTwo={bot} botIs="B" />
   );
 };
 export default BaghvsBot;
