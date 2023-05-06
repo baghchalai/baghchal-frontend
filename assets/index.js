@@ -5,5 +5,8 @@ import logo from './logo.png';
 import watch from './watch.png';
 import goatHead from './goat-head.png';
 import learn from './learn.png';
+import bot from './bot.svg';
+import randomUser from './randomUser.jpg';
+import loadingDots from './loading-dots.gif';
 
-export default { board, bagh, goat, logo, watch, goatHead, learn };
+export default { board, bagh, goat, logo, watch, goatHead, learn, bot, randomUser, loadingDots };

@@ -4,8 +4,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import images from '../assets';
 import Button from './Button';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 const Sidebar = () => {
+  const { token } = useAuthContext();
   const router = useRouter();
   const { theme } = useTheme();
   return (
@@ -32,20 +34,36 @@ const Sidebar = () => {
         </div>
       </div>
       <div className="flex flex-col gap-3 w-full px-4 mb-8">
-        <Button
-          classStyles="font-bold text-lg rounded-md"
-          btnName="Login"
-          handleClick={() => {
-            router.push('/login');
-          }}
-        />
-        <Button
-          classStyles="font-bold text-lg rounded-md"
-          btnName="SignUp"
-          handleClick={() => {
-            router.push('/signup');
-          }}
-        />
+        {token === null
+          ? (
+            <><Button
+              classStyles="font-bold text-lg rounded-md"
+              btnName="Login"
+              handleClick={() => {
+                router.push('/login');
+              }}
+            />
+              <Button
+                classStyles="font-bold text-lg rounded-md"
+                btnName="SignUp"
+                handleClick={() => {
+                  router.push('/signup');
+                }}
+              />
+            </>
+          )
+          : (
+            <div className="flex flex-col justify-center items-center">
+              <span className="mb-3 font-inter font-medium">Hey, {token.username}</span>
+              <Button
+                classStyles="font-bold text-lg rounded-md bg-black"
+                btnName="Logout"
+                handleClick={() => {
+                  router.push('/signup');
+                }}
+              />
+            </div>
+          )}
       </div>
     </div>
   );
