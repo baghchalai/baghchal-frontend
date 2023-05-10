@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { Button } from '../../components';
+import { Button, Input } from '../../components';
 import images from '../../assets';
 
 const Play = () => {
@@ -56,6 +56,20 @@ const Play = () => {
           </div>
         </div>
 
+      </div>
+
+      <div className="relative mt-6 p-4 pl-8 rounded-md w-full bg-red-400">
+        <div className="font-inter font-medium text-2xl">Multiplayer</div>
+        <div className="flex justify-around">
+          <div>
+            <Input title="Create room" />
+            <Button btnName="Create" classStyles="mt-4" />
+          </div>
+          <div>
+            <Input title="Join room" />
+            <Button btnName="Join" classStyles="mt-4" />
+          </div>
+        </div>
       </div>
     </div>
   );
