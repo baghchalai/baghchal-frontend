@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { w3cwebsocket as W3CWebSocket } from 'websocket';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 import images from '../../../assets';
 import { Board } from '../../../Logic/baghchal';
 import { useAuthContext } from '../../../hooks/useAuthContext';
 import GameStatus from '../../../components/GameStatus';
+import { PlayerCard } from '../../../components';
 
 const BaghchalBoard = () => {
 //   const b = new Board();
@@ -16,7 +18,9 @@ const BaghchalBoard = () => {
   const [highlightBaghMove, setHighlightBaghMove] = useState([]);
   const [onBoarding, setOnBoarding] = useState(true);
   const [client, setClient] = useState(null);
-  // const [player2, setPlayer2] = useState(null);
+  const [player2Id, setPlayer2Id] = useState(null);
+  const [playerTwo, setPlayerTwo] = useState(null);
+  const [playerOne, setPlayerOne] = useState(null);
   const router = useRouter();
   const [roomName, setRoomName] = useState();
   useEffect(() => {
@@ -27,6 +31,8 @@ const BaghchalBoard = () => {
 
   useEffect(() => {
     if (token === null) return;
+    const { access, refresh, ...newPlayer } = token;
+    setPlayerOne(newPlayer);
     setClient(new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/baghchal/?username=${token.username}`));
     // setClient(new W3CWebSocket('ws://127.0.0.1:8000/ws/chat/baghchal/?username=kamal'));
 
@@ -56,6 +62,23 @@ const BaghchalBoard = () => {
           }
         }
         if (jsonData.type === 'remove_onboarding') {
+          // fetch the user data from Mapper
+          if (roomName !== undefined) {
+            axios({
+              method: 'GET',
+              url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/mapper/${roomName}`,
+              headers: {
+                Authorization: `JWT ${token.access}`,
+              },
+            }).then((response) => {
+              const resData = response.data;
+              if (resData.player1 === token.id) {
+                setPlayer2Id(resData.player2);
+              } else {
+                setPlayer2Id(resData.player1);
+              }
+            });
+          }
           setOnBoarding(jsonData.value);
         }
       };
@@ -64,6 +87,50 @@ const BaghchalBoard = () => {
     console.log(client);
   }, [roomName, token]);
 
+  useEffect(() => {
+    if (player2Id === null) return;
+    let responseData = {};
+    axios({
+      method: 'GET',
+      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/player/${player2Id}`,
+      headers: {
+        Authorization: `JWT ${token.access}`,
+      },
+    }).then((response) => {
+      const resData = response.data;
+      responseData = { ...responseData, ...resData };
+    });
+    axios({
+      method: 'GET',
+      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/users/${player2Id}`,
+      headers: {
+        Authorization: `JWT ${token.access}`,
+      },
+    }).then((response) => {
+      const resData = response.data;
+      responseData = { ...responseData, ...resData };
+      setPlayerTwo(responseData);
+    });
+  }, [player2Id]);
+
+  useEffect(() => {
+    if (playerOne === null) return;
+    if (playerOne.id === undefined) return;
+    axios({
+      method: 'GET',
+      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/player/${playerOne.id}`,
+      headers: {
+        Authorization: `JWT ${token.access}`,
+      },
+    }).then((response) => {
+      const resData = response.data;
+      setPlayerOne({ ...playerOne, ...resData });
+    });
+  }, [client]);
+
+  useEffect(() => {
+    console.log('mmmm', playerTwo);
+  }, [playerTwo]);
   //   const client = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName}/`);
   //   const client = new W3CWebSocket('ws://127.0.0.1:8000/ws/chat/baghchal/');
   //   console.log(client);
@@ -168,15 +235,7 @@ const BaghchalBoard = () => {
       {virtualBoard === 0
         ? (
           <div className="flex flex-col justify-around">
-            {/* {botCalculating
-              ? (
-                <div className="flex gap-3">
-                  <PlayerCard player={playerTwo} botIS={botIs} />
-                  <Image className="bg-white rounded-md" src={images.loadingDots} height={30} width={40} />
-                </div>
-              ) : (
-                <PlayerCard player={playerTwo} botIS={botIs} />
-              )} */}
+            {playerTwo !== null && <PlayerCard player={playerTwo} botIS="" />}
             <div className="flex justify-center items-center h-[625px] w-[625px]">
               <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
                 <Image className="absolute" src={images.board} alt="board-image" />
@@ -195,7 +254,7 @@ const BaghchalBoard = () => {
                 ))}
               </div>
             </div>
-            {/* <PlayerCard player={playerOne} botIS={botIs} /> */}
+            {playerOne !== null && <PlayerCard player={playerOne} botIS="" />}
           </div>
         )
         : (
@@ -209,6 +268,7 @@ const BaghchalBoard = () => {
               ) : (
                 <PlayerCard player={playerTwo} botIS={botIs} />
               )} */}
+            {playerTwo !== null && <PlayerCard player={playerTwo} botIS="" />}
             <div className="flex justify-center items-center h-[625px] w-[625px]">
               <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
                 <Image className="absolute" src={images.board} alt="board-image" />
@@ -227,7 +287,7 @@ const BaghchalBoard = () => {
                 ))}
               </div>
             </div>
-            {/* <PlayerCard player={playerOne} botIS={botIs} /> */}
+            {playerOne !== null && <PlayerCard player={playerOne} botIS="" />}
           </div>
 
         )}
