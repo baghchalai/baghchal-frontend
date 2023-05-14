@@ -5,18 +5,16 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Button, Input, Notification } from '../components';
 import images from '../assets';
-import { useAuthContext } from '../hooks/useAuthContext';
 
 const SignUp = () => {
   const router = useRouter();
   const [inputDetail, setInputDetail] = useState({ firstname: '', lastname: '', username: '', email: '', password: '' });
   const [error, setError] = useState(null);
-  const { dispatch } = useAuthContext();
   const handleSignUp = () => {
     setError(null);
     axios({
       method: 'POST',
-      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/jwt/create`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/auth/users/`,
       data: {
         first_name: inputDetail.firstname,
         last_name: inputDetail.lastname,
@@ -26,15 +24,17 @@ const SignUp = () => {
       },
     })
       .then((response) => {
-        if (response.status === 200) {
-          // setData(response.data);
-          console.log(response.data);
-          localStorage.setItem('token', JSON.stringify(response.data));
-          dispatch({ type: 'LOGIN', payload: response.data });
-          setInputDetail({ firstname: '', lastname: '', username: '', email: '', password: '' });
-          //   setLoadingCircle(false);
-          router.push('/', undefined, { shallow: true });
-        }
+        // if (response.status === 200) {
+        // setData(response.data);
+        console.log(response.data);
+        //   localStorage.setItem('token', JSON.stringify(response.data));
+        //   dispatch({ type: 'LOGIN', payload: response.data });
+        const notify = () => toast('Account Created, You can Login now');
+        notify();
+        setInputDetail({ firstname: '', lastname: '', username: '', email: '', password: '' });
+        //   setLoadingCircle(false);
+        router.push('/login', undefined, { shallow: true });
+        // }
       })
       .catch((err) => {
         // setLoadingCircle(false);
@@ -42,7 +42,17 @@ const SignUp = () => {
           setError(err.response.data.detail);
         }
         console.log(err); console.log(err.response);
-        setError('Something went wrong.');
+        // setError('Something went wrong.');
+        const response = err.response.data;
+        if ('username' in response) {
+          setError(err.response.data.username);
+        } else if ('password' in response) {
+          setError(err.response.data.password);
+        } else if ('email' in response) {
+          setError(err.response.data.email);
+        } else {
+          setError('Something went wrong');
+        }
       });
   };
 
@@ -52,7 +62,7 @@ const SignUp = () => {
       const notify = () => toast('Found previous session, Logging you in');
       notify();
       setTimeout(() => {
-        router.push('/', undefined, { shallow: true });
+        router.push('/', undefined, { shallow: false });
       }, 2000);
     }
   }, []);
@@ -67,11 +77,11 @@ const SignUp = () => {
           <div className="text-2xl font-medium m-2">Baghchal<span className="text-slate-400">.ai</span></div>
         </div>
         <div className="flex gap-4">
-          <Input placeholder="First Name" handleClick={(e) => { setInputDetail({ ...inputDetail, username: e.target.value }); }} />
-          <Input placeholder="Last Name" handleClick={(e) => { setInputDetail({ ...inputDetail, username: e.target.value }); }} />
+          <Input placeholder="First Name" handleClick={(e) => { setInputDetail({ ...inputDetail, firstname: e.target.value }); }} />
+          <Input placeholder="Last Name" handleClick={(e) => { setInputDetail({ ...inputDetail, lastname: e.target.value }); }} />
         </div>
         <Input placeholder="Username" handleClick={(e) => { setInputDetail({ ...inputDetail, username: e.target.value }); }} />
-        <Input placeholder="Email" handleClick={(e) => { setInputDetail({ ...inputDetail, username: e.target.value }); }} />
+        <Input placeholder="Email" handleClick={(e) => { setInputDetail({ ...inputDetail, email: e.target.value }); }} />
         <Input placeholder="Password" inputType="password" handleClick={(e) => { setInputDetail({ ...inputDetail, password: e.target.value }); }} hidePassword />
         <Button btnName="Sign Up" handleClick={handleSignUp} classStyles="mt-8" />
         <div className="flex justify-center items-center mt-8">

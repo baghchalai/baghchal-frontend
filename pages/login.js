@@ -49,7 +49,7 @@ const Login = () => {
       const notify = () => toast('Found previous session, Logging you in');
       notify();
       setTimeout(() => {
-        router.push('/', undefined, { shallow: true });
+        router.push('/', undefined, { shallow: false });
       }, 2000);
     }
   }, []);
