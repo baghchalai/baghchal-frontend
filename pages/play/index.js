@@ -58,7 +58,7 @@ const Play = () => {
 
       </div>
 
-      <div className="relative mt-6 p-4 pl-8 rounded-md w-full bg-red-400">
+      <div className="relative mt-6 p-4 pl-8 rounded-md w-full bg-status-bg-dark">
         <div className="font-inter font-medium text-2xl">Multiplayer</div>
         <div className="flex justify-around">
           <div>

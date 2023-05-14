@@ -8,5 +8,6 @@ import learn from './learn.png';
 import bot from './bot.svg';
 import randomUser from './randomUser.jpg';
 import loadingDots from './loading-dots.gif';
+import leaderboard from './leaderboard.svg';
 
-export default { board, bagh, goat, logo, watch, goatHead, learn, bot, randomUser, loadingDots };
+export default { board, bagh, goat, logo, watch, goatHead, learn, bot, randomUser, loadingDots, leaderboard };

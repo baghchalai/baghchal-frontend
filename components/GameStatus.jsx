@@ -36,7 +36,7 @@ const GameStatus = ({ board, selectedMoveIndex, setSelectedMoveIndex, setBoard, 
       </div>
 
       {/* <div>winner {board.is_game_over()}</div> */}
-      {board.is_game_over() ? <div>winner {board.winner()}</div> : <div>Not over</div>}
+      {/* {board.is_game_over() ? <div>winner {board.winner()}</div> : <div>Not over</div>} */}
       {/* {!board.is_game_over() ?? <div>Game Not OVer</div>} */}
       {/* <div>fen {board.fen_count}</div> */}
       <br />
@@ -47,7 +47,7 @@ const GameStatus = ({ board, selectedMoveIndex, setSelectedMoveIndex, setBoard, 
       board.moves.map((value, index) => <div className={`p-0.5 px-2 text-xs font-medium text-black w-1/3 rounded-sm hover:cursor-pointer hover:bg-baghchal-gray-3 hover:text-white ${index === selectedMoveIndex ? 'bg-baghchal-gray-3 text-white' : 'bg-baghchal-gray-2'} ${(index === board.moves.length - 1 && selectedMoveIndex) && 'bg-red-500'}`} onClick={() => changeBoardToClickedPgn(value)}>{value}</div>)
       }
       </div>
-      <Button classStyles="p-2 bg-red-500 rounded-sm" btnName="Restart" handleClick={() => { setVirtualBoard(0); setBoard(new Board()); }} />
+      <Button classStyles="p-2 bg-red-500 rounded-sm" btnName="Resign" handleClick={() => { setVirtualBoard(0); setBoard(new Board()); }} />
     </div>
   );
 };

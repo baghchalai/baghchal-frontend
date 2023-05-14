@@ -31,6 +31,13 @@ const Sidebar = () => {
             <Image src={images.watch} width={40} height={40} alt="logo" />
             <div className="text-xl font-bold">Watch</div>
           </div>
+          {token !== null
+            && (
+            <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer">
+              <Image src={images.leaderboard} width={40} height={40} alt="logo" />
+              <div className="text-xl font-bold">Rank</div>
+            </div>
+            )}
         </div>
       </div>
       <div className="flex flex-col gap-3 w-full px-4 mb-8">
