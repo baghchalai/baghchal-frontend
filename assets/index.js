@@ -9,5 +9,6 @@ import bot from './bot.svg';
 import randomUser from './randomUser.jpg';
 import loadingDots from './loading-dots.gif';
 import leaderboard from './leaderboard.svg';
+import baghchalHome from './baghchal-home.png';
 
-export default { board, bagh, goat, logo, watch, goatHead, learn, bot, randomUser, loadingDots, leaderboard };
+export default { board, bagh, goat, logo, watch, goatHead, learn, bot, randomUser, loadingDots, leaderboard, baghchalHome };

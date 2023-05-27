@@ -5,5 +5,6 @@ import Sidebar from './Sidebar';
 import StatusCard from './StatusCard';
 import PlayerCard from './PlayerCard';
 import Notification from './Notification';
+import Modal from './Modal';
 
-export { Input, Button, Board, Sidebar, StatusCard, PlayerCard, Notification };
+export { Input, Button, Board, Sidebar, StatusCard, PlayerCard, Notification, Modal };
