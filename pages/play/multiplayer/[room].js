@@ -31,11 +31,16 @@ const BaghchalBoard = () => {
 
   useEffect(() => {
     if (token === null) return;
+    if (token.username === undefined) return;
+    if (roomName === undefined) return;
+    console.log(token, roomName, 11111111111);
     const { access, refresh, ...newPlayer } = token;
     setPlayerOne(newPlayer);
-    setClient(new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/baghchal/?username=${token.username}`));
+    setClient(new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName}/?username=${token.username}`));
     // setClient(new W3CWebSocket('ws://127.0.0.1:8000/ws/chat/baghchal/?username=kamal'));
+  }, [roomName, token]);
 
+  useEffect(() => {
     if (client != null) {
       client.onopen = () => {
         console.log('websocket client connected');
@@ -85,8 +90,7 @@ const BaghchalBoard = () => {
     }
 
     console.log(client);
-  }, [roomName, token]);
-
+  }, [client]);
   useEffect(() => {
     if (player2Id === null) return;
     let responseData = {};
@@ -226,7 +230,7 @@ const BaghchalBoard = () => {
 
   if (onBoarding) {
     return (
-      <div>Loading</div>
+      <div className="w-full mt-20 text-center text-4xl font-bold">Waiting for Other Player to Join</div>
     );
   }
 

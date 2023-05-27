@@ -19,21 +19,21 @@ const Sidebar = () => {
         <div className="text-2xl font-medium m-2">Baghchal<span className="text-slate-400">.ai</span></div>
 
         <div className="w-full">
-          <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer">
+          <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer" onClick={() => { router.push('/play'); }}>
             <Image src={images.goatHead} width={40} height={40} alt="logo" />
             <div className="text-xl font-bold">Play</div>
           </div>
-          <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer">
+          <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer" onClick={() => { router.push('/learn'); }}>
             <Image src={images.learn} width={40} height={40} alt="logo" />
             <div className="text-xl font-bold">Learn</div>
           </div>
-          <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer">
+          <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer" onClick={() => { router.push('/leaderboard'); }}>
             <Image src={images.watch} width={40} height={40} alt="logo" />
             <div className="text-xl font-bold">Watch</div>
           </div>
           {token !== null
             && (
-            <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer">
+            <div className="mt-2 mb-2 p-2 flex justify-center items-center gap-4 hover:bg-baghchal-gray-3 hover:cursor-pointer" onClick={() => { router.push('/leaderboard'); }}>
               <Image src={images.leaderboard} width={40} height={40} alt="logo" />
               <div className="text-xl font-bold">Rank</div>
             </div>
