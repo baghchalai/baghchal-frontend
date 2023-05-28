@@ -111,6 +111,19 @@ const BaghchalBoard = () => {
                 setPlayer2Id(resData.player1);
               }
             });
+
+            if (roomDetail === null) {
+              axios({
+                method: 'GET',
+                url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/room/${roomName}`,
+                headers: {
+                  Authorization: `JWT ${token.access}`,
+                },
+              }).then((response) => {
+                const resData = response.data;
+                setRoomDetail(resData);
+              });
+            }
           }
           setOnBoarding(jsonData.value);
         }
@@ -317,7 +330,7 @@ const BaghchalBoard = () => {
       {virtualBoard === 0
         ? (
           <div className="flex flex-col justify-around">
-            {playerTwo !== null && <PlayerCard player={playerTwo} botIS="" />}
+            {playerTwo !== null && (player2Id === roomDetail.creator ? <PlayerCard player={playerTwo} botIS="B" /> : <PlayerCard player={playerTwo} botIS="G" />)}
             <div className="flex justify-center items-center h-[625px] w-[625px]">
               <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
                 <Image className="absolute" src={images.board} alt="board-image" />
@@ -336,7 +349,7 @@ const BaghchalBoard = () => {
                 ))}
               </div>
             </div>
-            {playerOne !== null && <PlayerCard player={playerOne} botIS="" />}
+            {playerOne !== null && roomDetail !== null && (player2Id === roomDetail.creator ? <PlayerCard player={playerOne} botIS="G" /> : <PlayerCard player={playerOne} botIS="B" />)}
           </div>
         )
         : (
@@ -350,7 +363,8 @@ const BaghchalBoard = () => {
               ) : (
                 <PlayerCard player={playerTwo} botIS={botIs} />
               )} */}
-            {playerTwo !== null && <PlayerCard player={playerTwo} botIS="" />}
+            {/* {playerTwo !== null && <PlayerCard player={playerTwo} botIS="" />} */}
+            {playerTwo !== null && (player2Id === roomDetail.creator ? <PlayerCard player={playerTwo} botIS="B" /> : <PlayerCard player={playerTwo} botIS="G" />)}
             <div className="flex justify-center items-center h-[625px] w-[625px]">
               <div className="relative board h-[600px] w-[600px] flex flex-col justify-between">
                 <Image className="absolute" src={images.board} alt="board-image" />
@@ -369,7 +383,7 @@ const BaghchalBoard = () => {
                 ))}
               </div>
             </div>
-            {playerOne !== null && <PlayerCard player={playerOne} botIS="" />}
+            {playerOne !== null && roomDetail !== null && (playerOne.id !== roomDetail.creator ? <PlayerCard player={playerOne} botIS="B" /> : <PlayerCard player={playerOne} botIS="G" />)}
           </div>
         )}
       {board.is_game_over() && (
