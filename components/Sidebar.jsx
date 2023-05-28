@@ -5,11 +5,14 @@ import { useRouter } from 'next/router';
 import images from '../assets';
 import Button from './Button';
 import { useAuthContext } from '../hooks/useAuthContext';
+import { useLogout } from '../hooks/useLogout';
 
 const Sidebar = () => {
   const { token } = useAuthContext();
   const router = useRouter();
   const { theme } = useTheme();
+  const { logout } = useLogout();
+
   return (
     <div className={`flex flex-col items-center h-screen w-48 justify-between ${theme === 'dark' ? 'bg-status-bg-dark' : 'bg-status-bg-dark'}`}>
       <div className="flex flex-col items-center w-full px-2">
@@ -66,7 +69,8 @@ const Sidebar = () => {
                 classStyles="font-bold text-lg rounded-md bg-black"
                 btnName="Logout"
                 handleClick={() => {
-                  router.push('/signup');
+                  logout();
+                  router.push('/', undefined, { shallow: true });
                 }}
               />
             </div>

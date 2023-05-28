@@ -30,7 +30,7 @@ const Login = () => {
           dispatch({ type: 'LOGIN', payload: response.data });
           setInputDetail({ email: '', password: '' });
           //   setLoadingCircle(false);
-          router.push('/', undefined, { shallow: true });
+          router.push('/', undefined, { shallow: false });
         }
       })
       .catch((err) => {
