@@ -3,11 +3,12 @@ import Image from 'next/image';
 import { w3cwebsocket as W3CWebSocket } from 'websocket';
 import { useRouter } from 'next/router';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import images from '../../../assets';
 import { Board } from '../../../Logic/baghchal';
 import { useAuthContext } from '../../../hooks/useAuthContext';
 import GameStatus from '../../../components/GameStatus';
-import { PlayerCard } from '../../../components';
+import { Button, Modal, Notification, PlayerCard } from '../../../components';
 
 const BaghchalBoard = () => {
 //   const b = new Board();
@@ -21,6 +22,8 @@ const BaghchalBoard = () => {
   const [player2Id, setPlayer2Id] = useState(null);
   const [playerTwo, setPlayerTwo] = useState(null);
   const [playerOne, setPlayerOne] = useState(null);
+  const [roomDetail, setRoomDetail] = useState(null);
+  const [multiplayerObjectData, setMultiplayerObjectData] = useState(null);
   const router = useRouter();
   const [roomName, setRoomName] = useState();
   useEffect(() => {
@@ -33,7 +36,32 @@ const BaghchalBoard = () => {
     if (token === null) return;
     if (token.username === undefined) return;
     if (roomName === undefined) return;
-    console.log(token, roomName, 11111111111);
+
+    // if the roomname is not active then return
+    axios({
+      method: 'GET',
+      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/room/${roomName}`,
+      headers: {
+        Authorization: `JWT ${token.access}`,
+      },
+    }).then((response) => {
+      const resData = response.data;
+      setRoomDetail(resData);
+      if (resData.active === false) {
+        const notify = () => toast('Room is not active.');
+        notify();
+        setTimeout(() => {
+          router.push('/play', undefined, { shallow: false });
+        }, 2000);
+      }
+    }).catch(() => {
+      const notify = () => toast('Room is not available with this name.');
+      notify();
+      setTimeout(() => {
+        router.push('/play', undefined, { shallow: false });
+      }, 2000);
+    });
+
     const { access, refresh, ...newPlayer } = token;
     setPlayerOne(newPlayer);
     setClient(new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName}/?username=${token.username}`));
@@ -91,6 +119,52 @@ const BaghchalBoard = () => {
 
     console.log(client);
   }, [client]);
+
+  // when the game is over
+  useEffect(() => {
+    if (board.is_game_over()) {
+      setVirtualBoard(new Board(board.pgn));
+      if (roomDetail.creator === token.id) {
+        // create multiplayer game
+        axios({
+          method: 'POST',
+          url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/multiplayer/`,
+          headers: {
+            Authorization: `JWT ${token.access}`,
+          },
+          data: {
+            player1: token.id,
+            player2: player2Id,
+            pgn: board.pgn,
+            player1_played_as: 'goat',
+          },
+        }).then((res) => {
+          setMultiplayerObjectData(res.data);
+          console.log(11111111111, res.data);
+        }).catch((err) => console.log(err));
+      }
+    }
+  }, [board]);
+
+  useEffect(() => {
+    // In room set the multiplayer object and
+    if (multiplayerObjectData === null) return;
+    axios({
+      method: 'PATCH',
+      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/room/${roomName}/`,
+      headers: {
+        Authorization: `JWT ${token.access}`,
+      },
+      data: {
+        // name: roomName,
+        // creator: token.id,
+        game: multiplayerObjectData?.id,
+      },
+    }).then((res) => {
+      console.log(res);
+    }).catch((err) => console.log(err));
+  }, [multiplayerObjectData]);
+
   useEffect(() => {
     if (player2Id === null) return;
     let responseData = {};
@@ -135,6 +209,7 @@ const BaghchalBoard = () => {
   useEffect(() => {
     console.log('mmmm', playerTwo);
   }, [playerTwo]);
+
   //   const client = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName}/`);
   //   const client = new W3CWebSocket('ws://127.0.0.1:8000/ws/chat/baghchal/');
   //   console.log(client);
@@ -230,7 +305,10 @@ const BaghchalBoard = () => {
 
   if (onBoarding) {
     return (
-      <div className="w-full mt-20 text-center text-4xl font-bold">Waiting for Other Player to Join</div>
+      <>
+        <div className="w-full mt-20 text-center text-4xl font-bold">Waiting for Other Player to Join</div>
+        <Notification />
+      </>
     );
   }
 
@@ -293,8 +371,35 @@ const BaghchalBoard = () => {
             </div>
             {playerOne !== null && <PlayerCard player={playerOne} botIS="" />}
           </div>
-
         )}
+      {board.is_game_over() && (
+        <Modal
+          header="Game Over"
+          body={(
+            <div className="mt-16">
+              {/* <p className="font-poppins dark:text-white text-baghchal-black-1 font-semibold text-xl">Profile Picture</p> */}
+              <div className="mt-4 w-full flex justify-center">
+
+                {board.winner() === 'G' && roomDetail.creator === token.id && 'You Won' }
+                {board.winner() === 'B' && roomDetail.creator === token.id && 'You Loose' }
+                {board.winner() === 'B' && roomDetail.creator !== token.id && 'You Won' }
+                {board.winner() === 'G' && roomDetail.creator !== token.id && 'You Loose' }
+
+              </div>
+            </div>
+          )}
+          footer={(
+            <div className="flex flex-row sm:flex-col ">
+              <Button
+                btnName="Done"
+                classStyles="mr-5 sm:mr-0 rounded-xl"
+                handleClick={() => { router.push('/play'); }}
+              />
+            </div>
+        )}
+          // handleClose={() => { setUpdateModal(false); }}
+        />
+      )}
       <GameStatus board={board} selectedMoveIndex={selectedMoveIndex} setSelectedMoveIndex={setSelectedMoveIndex} setBoard={setBoard} setVirtualBoard={setVirtualBoard} changeBoardToClickedPgn />
     </div>
   );

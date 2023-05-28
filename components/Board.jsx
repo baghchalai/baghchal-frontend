@@ -3,17 +3,22 @@ import Image from 'next/image';
 import { useWindowSize } from 'react-use';
 import Confetti from 'react-confetti';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 import images from '../assets';
 import { Board } from '../Logic/baghchal';
 import GameStatus from './GameStatus';
 import PlayerCard from './PlayerCard';
 import { useAuthContext } from '../hooks/useAuthContext';
+import Modal from './Modal';
+import Button from './Button';
 
 const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '', level = 5 }) => {
   const { token } = useAuthContext();
+  const router = useRouter();
   const [board, setBoard] = useState(new Board());
   const [virtualBoard, setVirtualBoard] = useState(0);
   const [selectedMoveIndex, setSelectedMoveIndex] = useState();
+  const [, setShowResult] = useState(false);
   const [highlightBaghMove, setHighlightBaghMove] = useState([]);
   const { width, height } = useWindowSize();
   const [botCalculating, setBotCalculaing] = useState(false);
@@ -116,7 +121,7 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '', level = 5 }
   // }
 
   useEffect(() => {
-    if (board.is_game_over()) {
+    if (board.is_game_over() && botIs !== '') {
       setVirtualBoard(new Board(board.pgn));
       axios({
         method: 'POST',
@@ -132,6 +137,7 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '', level = 5 }
       }).then((res) => {
         console.log(res);
       }).catch((err) => console.log(err));
+      setShowResult(true);
     }
     if (board.next_turn === botIs) {
       handleWork();
@@ -213,6 +219,29 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '', level = 5 }
         numberOfPieces={200}
         tweenDuration={5}
       />
+      )}
+      {board.is_game_over() && (
+        <Modal
+          header="Game Over"
+          body={(
+            <div className="mt-16">
+              {/* <p className="font-poppins dark:text-white text-baghchal-black-1 font-semibold text-xl">Profile Picture</p> */}
+              <div className="mt-4 w-full flex justify-center">
+                {board.winner() === botIs ? 'You Loose' : 'You Won'}
+              </div>
+            </div>
+          )}
+          footer={(
+            <div className="flex flex-row sm:flex-col ">
+              <Button
+                btnName="Done"
+                classStyles="mr-5 sm:mr-0 rounded-xl"
+                handleClick={() => { router.push('/play'); }}
+              />
+            </div>
+        )}
+          // handleClose={() => { setUpdateModal(false); }}
+        />
       )}
       <GameStatus board={board} selectedMoveIndex={selectedMoveIndex} setSelectedMoveIndex={setSelectedMoveIndex} setBoard={setBoard} setVirtualBoard={setVirtualBoard} changeBoardToClickedPgn />
     </div>
