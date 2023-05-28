@@ -9,7 +9,7 @@ import GameStatus from './GameStatus';
 import PlayerCard from './PlayerCard';
 import { useAuthContext } from '../hooks/useAuthContext';
 
-const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '' }) => {
+const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '', level = 5 }) => {
   const { token } = useAuthContext();
   const [board, setBoard] = useState(new Board());
   const [virtualBoard, setVirtualBoard] = useState(0);
@@ -32,7 +32,7 @@ const BaghchalBoard = ({ playerOne = '', playerTwo = '', botIs = '' }) => {
     if (board.next_turn === botIs) {
       setBotCalculaing(true);
       setVirtualBoard(new Board(board.pgn));
-      workerRef.current?.postMessage(board.pgn);
+      workerRef.current?.postMessage({ pgn: board.pgn, level });
     }
   }, [board.board]);
 

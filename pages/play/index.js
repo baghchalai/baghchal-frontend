@@ -6,13 +6,26 @@ import images from '../../assets';
 
 const Play = () => {
   const [selectedValue, setSelectedValue] = useState('');
+  const [joinRoomName, setJoinRoomName] = useState({ room: '' });
   const router = useRouter();
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
   };
 
   function handlePlayAsBaghClick() {
-    router.push('/play/bagh-vs-bot');
+    if (selectedValue === '') {
+      router.push('/play/bagh-vs-bot');
+    } else {
+      router.push(`play/bagh-vs-bot?level=${selectedValue}`);
+    }
+  }
+
+  function handlePlayAsGoatClick() {
+    if (selectedValue === '') {
+      router.push('/play/goat-vs-bot');
+    } else {
+      router.push(`play/goat-vs-bot?level=${selectedValue}`);
+    }
   }
 
   return (
@@ -35,11 +48,11 @@ const Play = () => {
             <label htmlFor="dropdown" className="font-inter block mt-5 text-xl">Select level of difficulty:</label>
             <select id="dropdown" className="outline-none p-2 rounded-sm font-inter bg-slate-50 text-black" value={selectedValue} onChange={handleChange}>
               <option value="">--Please choose Level of Difficulty--</option>
-              <option value="option1">1</option>
-              <option value="option2">2</option>
-              <option value="option3">3</option>
-              <option value="option4">4</option>
-              <option value="option5">5</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
             </select>
           </div>
           <div className="flex mt-6 mb-6  items-center gap-6">
@@ -51,7 +64,7 @@ const Play = () => {
             <div>
               <span className="font-inter font-semibold text-lg">Play as:</span>
               <Image src={images.goat} height={60} />
-              <Button btnName="Play" classStyles="font-inter text-xl mt-5" />
+              <Button btnName="Play" handleClick={() => handlePlayAsGoatClick()} classStyles="font-inter text-xl mt-5" />
             </div>
           </div>
         </div>
@@ -66,8 +79,8 @@ const Play = () => {
             <Button btnName="Create" classStyles="mt-4" />
           </div>
           <div>
-            <Input title="Join room" />
-            <Button btnName="Join" classStyles="mt-4" />
+            <Input title="Join room" handleClick={(e) => { setJoinRoomName({ ...joinRoomName, room: e.target.value }); }} />
+            <Button btnName="Join" classStyles="mt-4" handleClick={() => router.push(`/play/multiplayer/${joinRoomName.room}`, undefined, { shallow: false })} />
           </div>
         </div>
       </div>
