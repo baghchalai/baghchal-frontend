@@ -64,7 +64,7 @@ const Sidebar = () => {
           )
           : (
             <div className="flex flex-col justify-center items-center">
-              <span className="mb-3 font-inter font-medium">Hey, {token.username}</span>
+              <span className="mb-3 font-inter font-medium cursor-pointer" onClick={() => router.push('/profile')}>Hey, {token.username}</span>
               <Button
                 classStyles="font-bold text-lg rounded-md bg-black"
                 btnName="Logout"

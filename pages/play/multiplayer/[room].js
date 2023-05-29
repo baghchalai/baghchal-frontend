@@ -8,7 +8,7 @@ import images from '../../../assets';
 import { Board } from '../../../Logic/baghchal';
 import { useAuthContext } from '../../../hooks/useAuthContext';
 import GameStatus from '../../../components/GameStatus';
-import { Button, Modal, Notification, PlayerCard } from '../../../components';
+import { Button, Chat, Modal, Notification, PlayerCard } from '../../../components';
 
 const BaghchalBoard = () => {
 //   const b = new Board();
@@ -26,6 +26,9 @@ const BaghchalBoard = () => {
   const [multiplayerObjectData, setMultiplayerObjectData] = useState(null);
   const router = useRouter();
   const [roomName, setRoomName] = useState();
+  const [chatMessage, setChatMessage] = useState('');
+  const [currentMessage, setCurrentMessage] = useState('');
+
   useEffect(() => {
     if (!router.isReady) return;
     const { room } = router.query;
@@ -93,6 +96,11 @@ const BaghchalBoard = () => {
           } else {
             setVirtualBoard(0);
           }
+        }
+        if (jsonData.type === 'chatroom_message') {
+          setChatMessage(`${chatMessage},${jsonData.message}`);
+          // console.log(111111111111);
+          // console.log(chatMessage);
         }
         if (jsonData.type === 'remove_onboarding') {
           // fetch the user data from Mapper
@@ -414,6 +422,21 @@ const BaghchalBoard = () => {
           // handleClose={() => { setUpdateModal(false); }}
         />
       )}
+      <Chat
+        player1={playerOne}
+        player2={playerTwo}
+        message={chatMessage}
+        handleChange={(e) => { setCurrentMessage(e.target.value); }}
+        handleClick={(e) => {
+          client.send(JSON.stringify({
+            type: 'chatmessage',
+            message: currentMessage,
+            username: token.username,
+          }));
+          e.target.value = '';
+          setCurrentMessage('');
+        }}
+      />
       <GameStatus board={board} selectedMoveIndex={selectedMoveIndex} setSelectedMoveIndex={setSelectedMoveIndex} setBoard={setBoard} setVirtualBoard={setVirtualBoard} changeBoardToClickedPgn />
     </div>
   );

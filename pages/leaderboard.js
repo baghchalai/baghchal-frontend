@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 const Leaderboard = () => {
+  const router = useRouter();
   const [leaderboardData, setLeaderboardData] = useState([]);
   useEffect(() => {
     axios({
@@ -44,7 +46,7 @@ const Leaderboard = () => {
                   <td className="px-6 py-4">
                     <Image className="rounded-full" src={val.image} alt="profile-image" width={50} height={50} />
                   </td>
-                  <td className="px-6 py-4">
+                  <td onClick={() => router.push(`/profile/${val.user.id}`)} className="cursor-pointer px-6 py-4">
                     {val.user.username}
                   </td>
                   <td className="px-6 py-4">

@@ -103,7 +103,7 @@ const Home = () => {
                     {/* <p className="font-poppins dark:text-white text-baghchal-black-1 font-semibold text-xl">JPG, PNG, GIF, SVG, WEBM.</p> */}
                     <div className="flex justify-center h-32 w-32 cursor-pointer">
                       {!fileUrl
-                        ? <Image src={images.upload} width={50} height={50} objectFit="contain" alt="file upload" className={`${theme === 'light' ? 'filter invert' : ''}`} />
+                        ? <Image src={images.randomUser} width={100} height={100} alt="file upload" className={`bg-cover rounded-full ${theme === 'light' ? 'filter invert' : ''}`} />
                         : <img src={fileUrl} alt="file upload" className="rounded-full object-cover" />}
                     </div>
                     {/* <p className="font-poppins dark:text-white text-baghchal-black-1 font-semibold text-sm">Drag and Drop File</p>

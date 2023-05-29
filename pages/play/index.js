@@ -1,12 +1,18 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { Button, Input } from '../../components';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { Notification, Button, Input } from '../../components';
 import images from '../../assets';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
 const Play = () => {
+  const { token } = useAuthContext();
   const [selectedValue, setSelectedValue] = useState('');
   const [joinRoomName, setJoinRoomName] = useState({ room: '' });
+  const [createRoomName, setCreateRoomName] = useState({ room: '' });
+  const [errorCreateRoom, setErrorCreateRoom] = useState(null);
   const router = useRouter();
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
@@ -26,6 +32,50 @@ const Play = () => {
     } else {
       router.push(`play/goat-vs-bot?level=${selectedValue}`);
     }
+  }
+
+  function handleCreateRoom() {
+    if (createRoomName.room === '') {
+      setErrorCreateRoom('Empty Field');
+      return;
+    }
+    setErrorCreateRoom(null);
+    axios({
+      method: 'POST',
+      url: `${process.env.NEXT_PUBLIC_BACKEND_API}/game/room/`,
+      data: {
+        name: createRoomName.room,
+        creator: token.id,
+        game: null,
+      },
+      headers: {
+        Authorization: `JWT ${token.access}`,
+      },
+    })
+      .then((response) => {
+        // if (response.status === 200) {
+        // setData(response.data);
+        console.log(response.data);
+        //   localStorage.setItem('token', JSON.stringify(response.data));
+        //   dispatch({ type: 'LOGIN', payload: response.data });
+        const notify = () => toast('Room Created, You can Join now');
+        notify();
+      })
+      .catch((err) => {
+        // setLoadingCircle(false);
+        if (err.response?.status === 401) {
+          setErrorCreateRoom(err.response.data.detail);
+        }
+        console.log(err); console.log(err.response);
+        // setErrorCreateRoom('Something went wrong.');
+        const { response } = err;
+        console.log(response);
+        // if ('name' in response) {
+        //   setErrorCreateRoom(err.response.data.name);
+        // } else {
+        setErrorCreateRoom('Something went wrong');
+        // }
+      });
   }
 
   return (
@@ -75,8 +125,9 @@ const Play = () => {
         <div className="font-inter font-medium text-2xl">Multiplayer</div>
         <div className="flex justify-around">
           <div>
-            <Input title="Create room" />
-            <Button btnName="Create" classStyles="mt-4" />
+            <Input title="Create room" handleClick={(e) => { setCreateRoomName({ ...createRoomName, room: e.target.value }); }} />
+            <Button btnName="Create" classStyles="mt-4" handleClick={() => handleCreateRoom()} />
+            { errorCreateRoom !== null && <p className="absolute text-red-500">{errorCreateRoom}</p>}
           </div>
           <div>
             <Input title="Join room" handleClick={(e) => { setJoinRoomName({ ...joinRoomName, room: e.target.value }); }} />
@@ -84,6 +135,7 @@ const Play = () => {
           </div>
         </div>
       </div>
+      <Notification />
     </div>
   );
 };
