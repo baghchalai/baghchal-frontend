@@ -87,7 +87,7 @@ const Play = () => {
           <span className="ml-4 font-xs">[Physical multiplayer mode]</span>
           <Image className="absolute left-80 opacity-30 rounded-full" src={images.randomUser} height={275} width={275} />
           <div className="mt-24 ml-8">
-            <Button btnName="Play" classStyles="font-inter text-xl mt-5" />
+            <Button handleClick={() => router.push('/play/1v1-offline')} btnName="Play" classStyles="font-inter text-xl mt-5" />
           </div>
         </div>
 
